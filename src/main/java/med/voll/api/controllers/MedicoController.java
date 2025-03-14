@@ -32,6 +32,11 @@ public class MedicoController {
     public void atualizar (@RequestBody @Valid AtualizacaoMedicoDTO dto){
         var medico = medicoRepository.getReferenceById(dto.id());
         medico.atualizarInformacoes(dto);
+    }
 
+    @DeleteMapping("/{id}")
+    @Transactional
+    public void deletar (@PathVariable Long id){
+        medicoRepository.deleteById(id);
     }
 }
