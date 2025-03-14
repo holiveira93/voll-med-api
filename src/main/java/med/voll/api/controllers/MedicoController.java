@@ -2,10 +2,7 @@ package med.voll.api.controllers;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import med.voll.api.medico.CadastroMedicoDTO;
-import med.voll.api.medico.DadosListagemMedicoDTO;
-import med.voll.api.medico.MedicoEntity;
-import med.voll.api.medico.MedicoRepository;
+import med.voll.api.medico.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,5 +25,13 @@ public class MedicoController {
     @GetMapping
     public Page<DadosListagemMedicoDTO> listar (@PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao){
         return medicoRepository.findAll(paginacao).map(DadosListagemMedicoDTO::new);
+    }
+
+    @PutMapping
+    @Transactional
+    public void atualizar (@RequestBody @Valid AtualizacaoMedicoDTO dto){
+        var medico = medicoRepository.getReferenceById(dto.id());
+        medico.atualizarInformacoes(dto);
+
     }
 }
