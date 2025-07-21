@@ -7,43 +7,49 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/medicos")
-public class MedicoController {
+public class MedicoController{
 
     @Autowired
     MedicoRepository medicoRepository;
 
     @PostMapping
     @Transactional
-    public void cadastrar (@RequestBody @Valid CadastroMedicoDTO dto){
+    public void cadastrar(@RequestBody @Valid CadastroMedicoDTO dto){
         medicoRepository.save(new MedicoEntity(dto));
     }
 
     @GetMapping
-    public Page<DadosListagemMedicoDTO> listar (@PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao){
-        return medicoRepository.findAllByAtivoTrue(paginacao).map(DadosListagemMedicoDTO::new);
+    public ResponseEntity<Page<DadosListagemMedicoDTO>> listar(@PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao){
+        var page =  medicoRepository.findAllByAtivoTrue(paginacao).map(DadosListagemMedicoDTO::new);
+        return ResponseEntity.ok(page);
     }
 
     @PutMapping
     @Transactional
-    public void atualizar (@RequestBody @Valid AtualizacaoMedicoDTO dto){
+    public ResponseEntity atualizar(@RequestBody @Valid AtualizacaoMedicoDTO dto){
         var medico = medicoRepository.getReferenceById(dto.id());
         medico.atualizarInformacoes(dto);
+
+        return ResponseEntity.ok(new dadosDetalhamentoMedico(medico));
     }
 
     @DeleteMapping("/{id}")
     @Transactional
-    public void deletar (@PathVariable Long id){
+    public ResponseEntity deletar(@PathVariable Long id){
         medicoRepository.deleteById(id);
     }
 
     @PutMapping("/{id}")
     @Transactional
-    public void exclusaoLogica (@PathVariable Long id){
+    public ResponseEntity exclusaoLogica(@PathVariable Long id){
         var medico = medicoRepository.getReferenceById(id);
         medico.excluir();
+
+        return ResponseEntity.noContent().build();
     }
 }
