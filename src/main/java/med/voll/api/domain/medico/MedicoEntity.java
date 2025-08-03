@@ -1,8 +1,8 @@
-package med.voll.api.medico;
+package med.voll.api.domain.medico;
 
 import jakarta.persistence.*;
 import lombok.*;
-import med.voll.api.endereco.Endereco;
+import med.voll.api.domain.endereco.Endereco;
 
 @Table(name = "medicos")
 @Entity
@@ -26,6 +26,8 @@ public class MedicoEntity {
     @Embedded
     private Endereco endereco;
 
+    private boolean ativo;
+
     public MedicoEntity(CadastroMedicoDTO dto) {
         this.nome = dto.nome();
         this.email = dto.email();
@@ -33,5 +35,16 @@ public class MedicoEntity {
         this.crm = dto.crm();
         this.especialidade = dto.especialidade();
         this.endereco = new Endereco(dto.endereco());
+        this.ativo = true;
+    }
+
+    public void atualizarInformacoes(AtualizacaoMedicoDTO dto) {
+        if (dto.nome() != null) this.nome = dto.nome();
+        if (dto.telefone() != null) this.telefone = dto.telefone();
+        if (dto.enderecoDTO() != null) this.endereco.atualizarInformacoes(dto.enderecoDTO());
+    }
+
+    public void excluir() {
+        this.ativo = false;
     }
 }
