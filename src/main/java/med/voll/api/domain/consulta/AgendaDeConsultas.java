@@ -9,6 +9,9 @@ import med.voll.api.domain.pacientes.PacienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 @Service
 public class AgendaDeConsultas {
 
@@ -32,10 +35,26 @@ public class AgendaDeConsultas {
         
         var medico = escolherMedico(dados);
         var paciente = pacienteRepository.findById(dados.idPaciente()).get();
-        var consulta = new ConsultaEntity(null, medico, paciente, dados.data());
+        var consulta = new ConsultaEntity(null, medico, paciente, dados.data(), null);
 
         consultaRepository.save(consulta);
     }
+
+
+    public void cancelar(DadosCancelamentoConsulta dados){
+        if (!consultaRepository.existsById(dados.idConsulta())){
+            throw new ValidacaoException("Id da consulta informado não existe");
+        }
+
+        var consulta = consultaRepository.getReferenceById(dados.idConsulta());
+
+        if (isMenorQue24Horas(consulta.getData())){
+            throw new ValidacaoException("Consulta só pode ser cancelada com 24h de antecedência");
+        }
+
+        consultaRepository.delete(consulta);
+    }
+
 
     private MedicoEntity escolherMedico(DadosAgendamentoConsulta dados) {
         if(dados.idMedico() != null) {
@@ -48,4 +67,11 @@ public class AgendaDeConsultas {
 
         return medicoRepository.escolherMedicoAleatorioLivreNaData(dados.especialidade(), dados.data());
     }
+
+    public static boolean isMenorQue24Horas(LocalDateTime dataConsulta) {
+        LocalDateTime agora = LocalDateTime.now();
+        Duration duracao = Duration.between(agora, dataConsulta);
+        return duracao.toHours() < 24;
+    }
+
 }
