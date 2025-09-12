@@ -1,11 +1,10 @@
 package med.voll.api.domain.consulta;
 
-import jakarta.validation.ValidationException;
 import med.voll.api.domain.ValidacaoException;
-import med.voll.api.domain.consulta.validacoes.ValidadorAgendamentoDeConsulta;
+import med.voll.api.domain.consulta.validacoes.agendamento.ValidadorAgendamentoDeConsulta;
+import med.voll.api.domain.consulta.validacoes.cancelamento.ValidadorCancelamentoDeConsulta;
 import med.voll.api.domain.medico.MedicoEntity;
 import med.voll.api.domain.medico.MedicoRepository;
-import med.voll.api.domain.pacientes.PacienteEntity;
 import med.voll.api.domain.pacientes.PacienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,6 +27,9 @@ public class AgendaDeConsultas {
 
     @Autowired
     private List<ValidadorAgendamentoDeConsulta> validadores;
+
+    @Autowired
+    private List<ValidadorCancelamentoDeConsulta> validadoresCancelamento;
 
     public DadosDetalhamentoConsulta agendar(DadosAgendamentoConsulta dados){
         if (!pacienteRepository.existsById(dados.idPaciente())){
@@ -56,9 +58,10 @@ public class AgendaDeConsultas {
 
     public void cancelar(DadosCancelamentoConsulta dados){
         if (!consultaRepository.existsById(dados.idConsulta())){
-            throw new ValidacaoException("Id da consulta informado não existe");
+            throw new ValidacaoException("Id da consulta informada não existe");
         }
 
+        validadoresCancelamento.forEach(v -> v.validar(dados));
         var consulta = consultaRepository.getReferenceById(dados.idConsulta());
 
         if (isMenorQue24Horas(consulta.getData())){
