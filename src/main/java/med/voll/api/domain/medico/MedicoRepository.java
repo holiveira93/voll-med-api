@@ -13,7 +13,7 @@ public interface MedicoRepository extends JpaRepository<MedicoEntity, Long> {
     Page<MedicoEntity> findAllByAtivoTrue(Pageable paginacao);
 
     @Query("""
-            select m from Medico m
+            select m from MedicoEntity m
             where m.ativo = true
             and m.especialidade = :especialidade
             and m.id not in (
@@ -24,5 +24,9 @@ public interface MedicoRepository extends JpaRepository<MedicoEntity, Long> {
             """)
     MedicoEntity escolherMedicoAleatorioLivreNaData(Especialidade especialidade, @NotNull @Future LocalDateTime data);
 
-    Boolean findAtivoById(Long id);
+    @Query("""
+            select m.ativo from MedicoEntity m
+            where m.id = :id
+            """)
+    boolean findAtivoById(Long id);
 }
