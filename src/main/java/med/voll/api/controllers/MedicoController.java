@@ -1,5 +1,6 @@
 package med.voll.api.controllers;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import med.voll.api.domain.medico.*;
@@ -37,6 +38,7 @@ public class MedicoController{
 
     @PutMapping
     @Transactional
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity atualizar(@RequestBody @Valid AtualizacaoMedicoDTO dto){
         var medico = medicoRepository.getReferenceById(dto.id());
         medico.atualizarInformacoes(dto);
